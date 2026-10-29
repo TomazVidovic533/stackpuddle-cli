@@ -1,25 +1,86 @@
 version: "3"
 
+# Every check runs with GOWORK=off so a local go.work never changes what is verified. The environment of
+# the caller overrides this value on purpose: until the stackpuddle dependency is re-pinned to a pushed
+# commit that holds the model package, the checks run against a workspace file outside the repository
+# (GOWORK=<file> task check), and check:tidy then reports NOT RUN instead of fetching unpushed code.
+env:
+  GOWORK: "off"
+
 tasks:
   fmt:
-    desc: Format Go source files
+    desc: Format Go source files with the gofmt of the toolchain go.mod selects
     cmds:
-      - gofmt -w .
+      - '"$(go env GOROOT)/bin/gofmt" -w .'
 
-  fmt:check:
-    desc: Check Go source formatting
+  check:format:
+    desc: Check Go source formatting with the gofmt of the toolchain go.mod selects
     cmds:
-      - test -z "$(gofmt -l .)"
-
-  test:
-    desc: Run uncached Go tests with race detection
-    cmds:
-      - go test -race -count=1 ./...
+      - |
+        gofmt="$(go env GOROOT)/bin/gofmt"
+        echo "check:format: gofmt from $(go env GOVERSION) at $gofmt"
+        unformatted=$("$gofmt" -l .) || exit 1
+        if [ -n "$unformatted" ]; then
+          echo "Go files need formatting:"
+          printf '%s\n' "$unformatted"
+          exit 1
+        fi
 
   vet:
     desc: Run Go static analysis
     cmds:
       - go vet ./...
+
+  check:tidy:
+    desc: Check go.mod and go.sum are tidy (not run in workspace mode)
+    cmds:
+      - |
+        workspace="$(go env GOWORK)"
+        if [ -z "$workspace" ] || [ "$workspace" = "off" ]; then
+          go mod tidy -diff
+        else
+          echo "check:tidy: NOT RUN: workspace mode ($workspace); go mod tidy ignores go.work and would fetch unpushed siblings; run GOWORK=off task check after the re-pin"
+        fi
+
+  test:
+    desc: Run uncached, shuffled Go tests with race detection (needs cgo and a C compiler)
+    cmds:
+      - |
+        if ! command -v "$(go env CC)" >/dev/null 2>&1; then
+          echo "test: the race detector needs cgo and a C compiler; '$(go env CC)' was not found"
+          exit 1
+        fi
+      - go test -race -count=1 -shuffle=on ./...
+
+  test:integration:
+    desc: Run the Docker-backed lifecycle tests in a disposable Compose project (needs the Docker daemon and Compose)
+    preconditions:
+      - sh: docker compose version
+        msg: "test:integration needs Docker Compose: `docker compose version` failed"
+      - sh: docker info
+        msg: "test:integration needs Docker: `docker info` failed"
+    cmds:
+      - go vet -tags integration ./tests/integration/...
+      - go test -race -count=1 -p 1 -v -tags integration ./tests/integration/...
+
+  check:integration-tags:
+    desc: Require the integration build constraint on every Go file under tests/integration
+    cmds:
+      - |
+        files=$(find tests/integration -name '*.go' -type f 2>/dev/null) || { echo "check:integration-tags: cannot list tests/integration" >&2; exit 1; }
+        untagged=""
+        for file in $files; do
+          [ "$(head -n 1 "$file")" = "//go:build integration" ] || untagged="$untagged $file"
+        done
+        if [ -n "$untagged" ]; then
+          echo "check:integration-tags: these files lack '//go:build integration' on their first line, so check would run them:$untagged" >&2
+          exit 1
+        fi
+
+  test:fuzz:
+    desc: Fuzz the dotenv parser for a bounded time (outside check)
+    cmds:
+      - go test ./tests/unit/config -run='^$' -fuzz=FuzzParseDotenv -fuzztime=30s -fuzzminimizetime=2s -parallel=2
 
   build:
     desc: Build the stackpuddle binary into bin/
@@ -27,11 +88,13 @@ tasks:
       - go build -o bin/stackpuddle ./cmd/stackpuddle
 
   check:
-    desc: Check formatting, static analysis, dependencies, tests, and build
+    desc: Check formatting, static analysis, dependencies, tests, and build (Docker-free)
     cmds:
-      - task: fmt:check
+      - task: check:format
       - task: vet
+      - task: check:tidy
       - go mod verify
+      - task: check:integration-tags
       - task: test
       - task: build
 
