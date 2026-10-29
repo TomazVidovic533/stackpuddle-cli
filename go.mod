@@ -3,8 +3,8 @@ module github.com/TomazVidovic533/stackpuddle-cli
 go 1.27.0
 
 require (
-	github.com/TomazVidovic533/stackpuddle v0.0.0-20261029010641-014df27a6e94
-	github.com/TomazVidovic533/stackpuddle-control-plane v0.0.0-00010101000000-000000000000
+	github.com/TomazVidovic533/stackpuddle v0.0.0-20261029223057-8462ff597517
+	github.com/TomazVidovic533/stackpuddle-control-plane v0.0.0-20261029223324-8c196672b1bc
 	github.com/santhosh-tekuri/jsonschema/v6 v6.0.3
 	github.com/spf13/cobra v1.10.2
 	go.yaml.in/yaml/v3 v3.0.5

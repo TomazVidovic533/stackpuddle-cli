@@ -36,9 +36,6 @@ GOWORK=off task check
 GOWORK=off task test:integration   # Docker: runs real operations in a disposable Compose project
 ```
 
-Until the control plane and stackpuddle are pushed at the commits this CLI uses, both tasks run against a
-workspace file kept outside the repository (`GOWORK=<file> task check`); `check:tidy` then reports `NOT RUN`.
-
 ## License
 
 Licensed under the [Apache License 2.0](LICENSE).
