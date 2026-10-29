@@ -1,0 +1,25 @@
+{
+  "results": [
+    {
+      "checker": "structure",
+      "stage": "structure",
+      "state": "pass",
+      "findings": []
+    },
+    {
+      "checker": "configuration",
+      "stage": "configuration",
+      "state": "fail",
+      "environment": "local",
+      "findings": [
+        {
+          "code": "config.input_missing",
+          "file": "stackpuddle.yaml",
+          "pointer": "/spec/inputs/api-log-level",
+          "message": "input \"api-log-level\" has no value in environment \"local\""
+        }
+      ]
+    }
+  ],
+  "outcome": "fail"
+}

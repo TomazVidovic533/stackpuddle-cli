@@ -1,0 +1,27 @@
+{
+  "results": [
+    {
+      "checker": "structure",
+      "stage": "structure",
+      "state": "pass",
+      "findings": []
+    },
+    {
+      "checker": "configuration",
+      "stage": "configuration",
+      "state": "unknown",
+      "environment": "local",
+      "findings": [
+        {
+          "code": "config.definition_unresolved",
+          "file": "stackpuddle.yaml",
+          "line": 10,
+          "column": 7,
+          "pointer": "/spec/modules/db/options",
+          "message": "options of module \"db\" were not checked: definition \"postgres\" is not supplied"
+        }
+      ]
+    }
+  ],
+  "outcome": "unknown"
+}

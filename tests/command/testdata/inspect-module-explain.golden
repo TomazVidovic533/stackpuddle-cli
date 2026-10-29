@@ -1,0 +1,34 @@
+{
+  "ref": "module/audit",
+  "environment": "local",
+  "entries": [
+    {
+      "name": "/level",
+      "status": "supplied",
+      "value": "full",
+      "source": {
+        "layer": "environment",
+        "location": {
+          "file": "stackpuddle.yaml",
+          "line": 76,
+          "column": 15,
+          "pointer": "/spec/environments/local/overrides/modules/audit/options/level"
+        }
+      }
+    },
+    {
+      "name": "/retentionDays",
+      "status": "supplied",
+      "value": "30",
+      "source": {
+        "layer": "project",
+        "location": {
+          "file": "stackpuddle.yaml",
+          "line": 43,
+          "column": 9,
+          "pointer": "/spec/modules/audit/options/retentionDays"
+        }
+      }
+    }
+  ]
+}

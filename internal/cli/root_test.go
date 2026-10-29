@@ -9,7 +9,7 @@ import (
 func TestRootCommandHelp(t *testing.T) {
 	t.Parallel()
 
-	command := NewRootCommand()
+	command := NewRootCommand(Dependencies{})
 	output := new(bytes.Buffer)
 	command.SetOut(output)
 	command.SetErr(output)

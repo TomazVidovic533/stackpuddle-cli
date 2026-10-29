@@ -1,0 +1,57 @@
+{
+  "ref": "workload/api",
+  "environment": "local",
+  "entries": [
+    {
+      "name": "API_TOKEN",
+      "status": "supplied",
+      "sensitive": true,
+      "redacted": true,
+      "source": {
+        "layer": "local",
+        "location": {
+          "file": "stackpuddle.yaml",
+          "pointer": "/spec/environments/local/inputs/api-token/local"
+        },
+        "local": {
+          "file": ".env.local",
+          "key": "API_TOKEN"
+        }
+      }
+    },
+    {
+      "name": "LOG_LEVEL",
+      "status": "supplied",
+      "value": "debug",
+      "source": {
+        "layer": "environment",
+        "location": {
+          "file": "stackpuddle.yaml",
+          "pointer": "/spec/environments/local/inputs/api-log-level/value"
+        }
+      },
+      "shadowed": [
+        {
+          "layer": "project",
+          "location": {
+            "file": "stackpuddle.yaml",
+            "pointer": "/spec/inputs/api-log-level/value"
+          },
+          "reason": "overridden"
+        }
+      ]
+    },
+    {
+      "name": "MODE",
+      "status": "supplied",
+      "value": "verbose",
+      "source": {
+        "layer": "environment",
+        "location": {
+          "file": "stackpuddle.yaml",
+          "pointer": "/spec/environments/local/overrides/workloads/api/environment/MODE"
+        }
+      }
+    }
+  ]
+}
