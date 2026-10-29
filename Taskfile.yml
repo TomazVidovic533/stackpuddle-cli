@@ -1,0 +1,41 @@
+version: "3"
+
+tasks:
+  fmt:
+    desc: Format Go source files
+    cmds:
+      - gofmt -w .
+
+  fmt:check:
+    desc: Check Go source formatting
+    cmds:
+      - test -z "$(gofmt -l .)"
+
+  test:
+    desc: Run uncached Go tests with race detection
+    cmds:
+      - go test -race -count=1 ./...
+
+  vet:
+    desc: Run Go static analysis
+    cmds:
+      - go vet ./...
+
+  build:
+    desc: Build the stackpuddle binary into bin/
+    cmds:
+      - go build -o bin/stackpuddle ./cmd/stackpuddle
+
+  check:
+    desc: Check formatting, static analysis, dependencies, tests, and build
+    cmds:
+      - task: fmt:check
+      - task: vet
+      - go mod verify
+      - task: test
+      - task: build
+
+  verify:
+    desc: Compatibility alias for check
+    cmds:
+      - task: check
